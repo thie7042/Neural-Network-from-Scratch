@@ -1,5 +1,6 @@
 This repository will track my development of an ANN from scratch in Python. 
 
+
 A quick breakdown of terminology: 
 
 - Deep Neural Network = A Neural Network with 2 or more hidden layers 
@@ -12,9 +13,11 @@ A quick breakdown of terminology:
 - Note: Common practise to scale input to values between 0 and 1 (or -1 and 1)
 - Output layer = The neural network prediction / output 
 - Classification -> the neural network is attempting to predict the class of the input data. For this application, the output layer will have a neruon for each potential class (unless we are conducting a binary classification, in whcih case a single output neuron may suffice)
-
+- Clustering -> Assigning unstructured data into groups (clusters)
+- Tensors -> an object that holds data (closely related to arrays) 
 
 The "learning" process: 
+
 - Dense layers (The most common layer type) -> each neuron is connected to each neuron of the next layer. Each neuron output value becomes an input for the next layer
 - Connections between neurons contain a weight which controls how much of the neurons input is used. Connection weights are trainable through the learning process 
 - Weights are mulitplied by the input value to create the input. Each of these inputs which flow into a neuron is summed together and a bias is added
@@ -24,8 +27,14 @@ The "learning" process:
 - Weights (w) will control the magnitude of the input (or even flip the sign of the input)
 - The bias (b) can be thought of as an offset parameter. It will shift the value of the input
 - Example: x1 = w0x0 + b1   [ of the form y=mx + b . This would be a summed equation in practise ]
+- Overfitting = When the neural netowrk only learns the best way to fit the data, without learning anything about the underlying input-output relationship. The ANN has just memorized the trainign data.
+- Overcomming overfiting -> use "in sample" data to train and "out of sample" data to validate 
+- Example: 100,000 data set. Commit 90,000 to in-sample training, 10,000 to validation 
+- The goal: Our model is capable of predicting the training and validation data 
+
 
 Function types:
+
 - Step function: Think of a binary switch. e.g if x>0, y=1 (activation), if <=0, y=0 (no activation). 
 - For a step function: If a neurons output value ( the sum of weight x inuts + the bias ) is greater than 0, the neuron fires. We also want to apply an activation function to the output. 
 - Step functions are a binary tool. In practise, empirical evidence has shown that other (more sophisticated) functions provide better results. An extremely common example is ReLu
