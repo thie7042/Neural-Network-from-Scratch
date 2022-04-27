@@ -1,0 +1,1 @@
+This repository will track my development of an ANN from scratch in Python. 
