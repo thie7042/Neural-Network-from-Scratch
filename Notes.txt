@@ -1,4 +1,4 @@
-This repository will track my development of an ANN from scratch in Python. 
+This repository will track the development of an ANN from scratch in Python. 
 
 
 A quick breakdown of terminology: 
@@ -14,11 +14,18 @@ A quick breakdown of terminology:
 - Output layer = The neural network prediction / output 
 - Classification -> the neural network is attempting to predict the class of the input data. For this application, the output layer will have a neruon for each potential class (unless we are conducting a binary classification, in whcih case a single output neuron may suffice)
 - Clustering -> Assigning unstructured data into groups (clusters)
-- Tensors -> an object that holds data (closely related to arrays) 
+- Tensors -> an object that holds data (closely related to arrays).
+- "A tensor is an object that can be represented as an array"
+- Homologous -> Each list along a dimension is equally long 
+- Dot produce produces scalar elements (sum of products), cross product produces vectors 
+- Batches -> The segmentation of data for training.
+- Batching data allows for parallel processing and assists generalization during training (instead of fittign to a single sample, we can make general tweaks to fit to the broader database)
+- Hidden layers -> Layers positioned between the first (input) and last (output) layers 
+- Loss and Accuracy are our useful tools (accuracy describes how often the largest confidence interval is correct for categorization)
 
 The "learning" process: 
 
-- Dense layers (The most common layer type) -> each neuron is connected to each neuron of the next layer. Each neuron output value becomes an input for the next layer
+- Dense layers (a.k.a fully connected "fc") (The most common layer type) -> each neuron is connected to each neuron of the next layer. Each neuron output value becomes an input for the next layer
 - Connections between neurons contain a weight which controls how much of the neurons input is used. Connection weights are trainable through the learning process 
 - Weights are mulitplied by the input value to create the input. Each of these inputs which flow into a neuron is summed together and a bias is added
 - Bias = a threshold which controls the amount of 'activation' input which is required before a neuron is activated 
@@ -31,12 +38,33 @@ The "learning" process:
 - Overcomming overfiting -> use "in sample" data to train and "out of sample" data to validate 
 - Example: 100,000 data set. Commit 90,000 to in-sample training, 10,000 to validation 
 - The goal: Our model is capable of predicting the training and validation data 
+- Note: Typically weights and biases are initialized randomly. However, if we want to load a pretrained model, we will initialize using the tuned parameters 
+- Why activation fucntions; To solve non-linear problems 
+- The loss function / cost function -> a tool to calculate how wrong our neural network is for its current predictions 
+- Ideally, we want our loss (model error) to be 0 
 
-
-Function types:
+Activation Functions:
 
 - Step function: Think of a binary switch. e.g if x>0, y=1 (activation), if <=0, y=0 (no activation). 
 - For a step function: If a neurons output value ( the sum of weight x inuts + the bias ) is greater than 0, the neuron fires. We also want to apply an activation function to the output. 
 - Step functions are a binary tool. In practise, empirical evidence has shown that other (more sophisticated) functions provide better results. An extremely common example is ReLu
-- ReLU = Rectified Linear. 
-- Sigmoid is also a very popular choice of activation function  
+- ReLU = Rectified Linear. y=x clipped at 0 from the negative side. if x <= 0, y = 0. Otherwise, y=x. Most widely used activation function (This is actually technically non-linear!)
+- Sigmoid is also a very popular choice of activation function (more informative) y = 1/(1+e^-x) . Range 0->1 (-infinity -> + infinity) . Equal to 0.5 for an input of 0 
+- The Linear activation  function y=x - simply a line equation (usually applied to the last layers output in regresion models).  
+- If we only use linear activation fucntions, out model wil lonly be able to predict linear relationships. We need to use non-linear functions.
+- Note: ReLu is not normalized (output values can be anything >= 0)
+- Softmax activation function - A greact activation function for classification 
+- Softmax is capable of taking non-normalized data and produce a normalized distribution of probabilities for the classes
+- This distribution represents the confidence scores for each class, adding up to 1  . The predicted class is chosen based on the output neuron with the largest confidence score
+
+Categorical Cross-Entropy Loss:
+
+- Used to compare a "ground-truth" probability and some prediction distribution 
+- Cross entropy compares two probability distributions 
+- One of the most common loss functions used with the Softmax activation function (categorization) 
+- one-hot : One value is 1, the rest are "off" (cold = 0) 
+- This equation simplifies down to the negative log of the target classes confidence score 
+- When confidence = 1 (100% sure about prediction), the loss = 0 
+
+Optimization:
+- Within this context, optimization is the process of tuning weights and biases to improve model performance. 

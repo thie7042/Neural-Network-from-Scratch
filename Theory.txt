@@ -1,0 +1,230 @@
+Theory & Background Information:
+
+
+This documentation seeks to provide some insight into how deep learning models work.
+
+
+The motivation:
+- Scaling (of data labeled training data and the size of the neural network) is driving deep learning progress
+- Increasing quantity of trainind data and size of neural network is (generally) yielding increased performance across the industry 
+- Fast computation is allowing for rapid iteration and optimization of neural networks 
+
+
+The focus of this work:
+- Convulutional Neural network (commonly used for image data)
+- Recurrant Neural network (useful for 1 dimensional sequence data that may have a temporal component)
+
+
+Supervised learning:
+- Structured data (database information has features which are well defined i.e "Size", "Price" etc.)
+- Unstructed data - (i.e audio / images (pixed data) / text. Features are not as clearly defined) 
+
+
+Notes on activation functions:
+- Problems with sigmoid: The activation function at the negative region significantly slows the learning process of gradient descent
+   ->  This is (one reason for) why ReLU is used so much! 
+- Derivative of the sigmoid function:
+- x = input 
+- s = 1 / (1+np.exp(-x))
+- ds = s * (1-s)
+
+Binary Classificaiton example:
+- Ouptut 1 or 0 to determine output lable (e.g cat or not cat for classification)
+- e.g RBG channels (64*64*3 pixel values) 
+- These can be combiend into an input feature vector X of length nx
+- nx = 12288 (64 x 64 x 3) 
+- x is our input, y is our binary output (0 or 1)
+- m_train = test set, m_test = test set
+- matrix X has nx rows and m columns 
+- Y is out output matrix with dimensions (1,m)
+
+Logistic regression: 
+- Given x, we want y^ = P( y=1 | x)
+- i.e we want the probabiltiy of y=1 output given the input x
+- How do we get y^ ?
+- Output : y^ = σ(wx + b)
+- Ouput = sigmoid function ( weights x input + bias )
+- z = wx+ b
+- σ = 1 / (1+e^-z) 
+- if z is large, σ(z) = 1
+- if z is a large negative σ(z) ≈ 0
+
+Cost function: 
+- We use our cost function to train our parameters and improve our model
+- Lets use an error function (Loss) to measure performance 
+- For logisitic regression, we will not use squared error as our cost function
+- We use the loss function: L(y^,y) = - (ylog(y^) + (1-y)log(1-y^))
+- If y = 1 L(y^,y) = -log(y^)      (want y^ large)
+- If y =0 L(y^,y) = 1- log(1-y^)   (want y^ small) 
+- Cost function: J(w,b) = 1/m Σ L(y^,y) = -1/m Σ[ylog(y^) + (1-y)log(1-y^)]
+- Basically: The cost funtion is the average of the loss functions (errors) for the training set
+- We want to find a set of parameters (w and b) which minimize this cost function J(w,b)
+- Logistic regression : y = σ(wt + b) , where σ(z) = sigmoid function
+- if y = 1 : p(y|x) = y^
+- if y = 0 :  y(y|x) = 1 - y^
+- These can be summarised using:   p(y|x) = yhat^y (1-yhat)^(1-y)
+- log p(y|x) = logyhat^y(1-yhat)^(1-y)  = ylogy^ + (1-y)log(1-y^)
+-    						= -L(y^,y)    (our loss function)
+- P(labels in training set) = product of all p(yi|xi)
+-    logp(...) = sum logp(yi|xi) 
+- Maximum likelehood etimation (Choose parameters which maximise this eq)
+- Minimizing the loss corresponds with maximizing logp(y|x).
+-   = - sum L(yhati,yi)
+- Cost (to minimise) J(w,b) = 1/m  sum L(yhati,yi)  
+
+
+Gradient Descent: 
+- Gradient descent starts at the initialization point
+- We then take a step in the direction with the steepest gradient 
+- dw = derivative term 
+- α = learning rate 
+- dJ(w,b)/dw is the slope of the objective function for current set of parameters (w,b) in the w direction
+- dJ(w,b)/db is the slope in the b direction at location of current parameters
+
+Repeat{
+	w := w - α x dJ(w,b)/dw
+	b := b - α x dJ(w,b)/db
+	}
+
+Computation graphs:
+- Forward propagation (This is where we calculate the outputs)
+- Back propagation (This is where we compute derivatives)
+- We can use computation graphs to visualise the left-to-right pass to calculate the output
+- Conversely, we use a right-to-left pass to calculate derivatives of final output variables 
+- The chain rule as follows:
+- If a affects v which affects J (a->v->J)
+- dJ/da = dJ/dv  dv/da
+- We take the product of two derivatives to find dJ/da (how much do changes to 'a' effect J)
+- This is our 'backward' calculation (back prop) 
+- We are interested in dJ/d(some other variable) 
+
+
+Example (a = y^):
+____________________________________________________________
+
+x1
+w1
+x2	- >  z = w1x1 + w2x2 + b   - >  a = σ(z)  - >  L(a,y)
+w2
+b
+____________________________________________________________
+
+dL(a,y)/da = -y/a + (1-y)/(1-a)
+
+dL/dz = a-y
+
+Lets now go backwards 
+
+da/dz = a(1-a)
+
+dL/dz = dL/a  da/dz  (using the chain rule)
+dL/dz = a-y 
+
+If we keen going backwards;
+dL/dw1 = x1 * dL/dx
+
+	w := w - α x dJ(w,b)/dw
+____________________________________________________________
+
+Scaling this method:
+
+dJ/dw1 = 1/m Σ dL(a,y)/dw1
+
+
+note: dw1 = dJ/dw1 (for notation) 
+- we average all gradients
+
+- This "code" is purely demonstrative. See scripts for actual implementation 
+
+initialize J = 0, dw1 = 0, dw2 = 0, db = 0
+
+
+for i to m
+	zi = wx + b
+	ai = σ(zi)
+	J = - [ yi log (ai) + (1-yi)log(1-ai) ]
+	dzi = ai-yi 
+
+	dw1 += x1i dzi 
+	dw2 + = x2i dzi
+	db += dzi
+
+# Now divide by m to calculate averages 
+J /= m 
+dw1 /= m 
+db /= m 
+
+w1 := w1 - α x dw1
+
+w2 := w2 - α x dw2
+
+b  := b - α x db
+
+
+Note: for scaling we actual want to avoid for loops. This is why we use vectorization 
+- We need our code to be efficient 
+- Ultimately, we want to avoid using for loops completely
+- We can use vecotrization for the calculation of the predictions (forward) and the calculation of the derivatives (backward)
+
+____________________________________________________________
+
+ 
+Image data:
+-An image is represented by a 3D array of shape (length, height, depth = 3) , where there are 3 channels (RGB)
+- However, when you read an image as the input of an algorithm you convert it to a vector of shape  ( length x height x 3, 1) . 
+- In other words, you "unroll", or reshape, the 3D array into a 1D vector.
+
+def image2vector(image):
+    """
+    Argument:
+    image -- a numpy array of shape (length, height, depth)
+    
+    Returns:
+    v -- a vector of shape (length*height*depth, 1)
+    """
+    v = image
+    v = v.reshape((image.shape[0] * image.shape[1]*3, 1))
+    return v
+
+Normalise by rows:
+
+def normalize_rows(x):
+    """
+    Implement a function that normalizes each row of the matrix x (to have unit length).
+    
+    Argument:
+    x -- A numpy matrix of shape (n, m)
+    
+    Returns:
+    x -- The normalized (by row) numpy matrix. 
+    """
+    x_norm = np.linalg.norm(x,ord = 2, axis = 1, keepdims = True)
+    x = x / x_norm
+    
+    return x
+
+Calculating softmax:
+
+def softmax(x):
+    """Calculates the softmax for each row of the input x.
+    Argument:
+    x -- A numpy matrix of shape (m,n)
+    Returns:
+    s -- A numpy matrix equal to the softmax of x, of shape (m,n)
+    """
+    
+    #(≈ 3 lines of code)
+    # Apply exp() element-wise to x. Use np.exp(...).
+    # x_exp = ...
+
+    # Create a vector x_sum that sums each row of x_exp. Use np.sum(..., axis = 1, keepdims = True).
+    # x_sum = ...
+    
+    # Compute softmax(x) by dividing x_exp by x_sum. It should automatically use numpy broadcasting.
+
+    x_exp = np.exp(x)
+    x_sum = np.sum(x_exp, axis = 1 , keepdims = True)
+    s = x_exp/x_sum
+    
+    
+    return s
