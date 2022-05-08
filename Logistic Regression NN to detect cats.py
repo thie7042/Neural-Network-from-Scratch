@@ -351,3 +351,4 @@ print("y = " + str(np.squeeze(my_predicted_image)) + ", this algorithm predicts 
 
 # Note: This script isn't very sophisticated and our data is fairly limited.
 # However, as a demo it suits its purpose!
+

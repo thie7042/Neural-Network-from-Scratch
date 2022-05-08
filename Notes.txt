@@ -45,6 +45,8 @@ The "learning" process:
 
 Activation Functions:
 
+- Why non-linear activation functions:Linear activation functions only calculate linear relationships between the prediction y^ and the input features
+- In general -> we want non-linear activation functions to induce nonlinear behaviour within our network
 - Step function: Think of a binary switch. e.g if x>0, y=1 (activation), if <=0, y=0 (no activation). 
 - For a step function: If a neurons output value ( the sum of weight x inuts + the bias ) is greater than 0, the neuron fires. We also want to apply an activation function to the output. 
 - Step functions are a binary tool. In practise, empirical evidence has shown that other (more sophisticated) functions provide better results. An extremely common example is ReLu
@@ -56,6 +58,25 @@ Activation Functions:
 - Softmax activation function - A greact activation function for classification 
 - Softmax is capable of taking non-normalized data and produce a normalized distribution of probabilities for the classes
 - This distribution represents the confidence scores for each class, adding up to 1  . The predicted class is chosen based on the output neuron with the largest confidence score
+- The hyperbolic tan function almost always works better than the sigmoid function
+- a = tanh(z) = (e^z - e^-z)/(e^z + e^-z). this ranges from -1 to 1
+- It is essentially a rescaled and shifted version of the sigmoid function
+- For hidden units, this is almost always better than sigmoid.
+- with values between -1 and 1, the mean are closer to havign a zero mean.
+- This 'center's the data closer to a mean of zero, improving the learning of the next layer
+- The exception to this; the output layer. If y is between 0,1 , it makes sense for classification 0<y^<1
+- We might use tanh for the hidden layer and sigmoid for the output for classification problems
+- Downsides of tanh and sigmoid: if z is very large or small, the slope of the function is close to zero. This slows down learning 
+- Relu works great here. The derivative is always 0 if z is negative 
+- If you are using binary classification: sigmoid works alright for the output
+- ReLu is increasingly the defualt activation function - it is used a lot!
+- Leaky ReLu - instead of 0 when z is negative, there is a very slight slope
+- Leaky ReLu usually actually works a bit better than ReLu, but its not used as much
+- Never use sigmoid unless for the ouput layer when you are doing binary classification
+- Tanh is strictly superior to sigmoid 
+- ReLu is generally used the most 
+- Leaky ReLu may be better than Relu ( a = max(0.01z,z) ) -> 0.01 can be a hyperparameter to tune 
+- Testing different activation functions (as a development set of models) is a good idea to find the approrpiate one
 
 Categorical Cross-Entropy Loss:
 
@@ -67,4 +88,83 @@ Categorical Cross-Entropy Loss:
 - When confidence = 1 (100% sure about prediction), the loss = 0 
 
 Optimization:
-- Within this context, optimization is the process of tuning weights and biases to improve model performance. 
+
+- Within this context, optimization is the process of tuning weights and biases to improve model performance.
+- Its important to initialize the weights randomly to start with (rather than all zeros)
+- This is specific for Neural networks ^
+- a[1] = a[2] if all weights are 0 . Then dz[1] = dz[2]. The hidden units will be completely identical
+- After every iteration of training, the hidden units will still be the same after each weight update 
+- instead, initialize randomly. if we have 2 neruons in a layer, W[1] = np.random.randn((2,2)) * 0.01 (we want our weights to be random but very small)
+- b[1] = np.zero((2,1) . biases dont suffer from the same issue
+- We dont want Z to be too big in psoitive or neg direction. This will slow learning
+- For very deep nerual networks, we might want a different constant than 0.01 
+- This can be another hyperparameter to consider?
+
+Derivatives of activation functions:
+
+- Sigmoid: g(z) = 1/(1+e^-z)
+- d/dz g(z) = slope of g(z) at z = 1/(1+e^-z)(1- 1/(1+e^-z)) = g(z)(1-(g(z))
+- g'(z) = g(z)(1 - g(z))	= a(1-a)
+
+- Tanh:  g(z) =tanh(z)
+- g'(z) = 1 - (tanh(z))^2
+
+
+- ReLu: g(z) = max(0,z)
+- g'(z) = 0 if z<0  , 1 if z>0 .  undefined if z = 0 (this is not necessary to consider in practise)
+
+- Leaky ReLU:
+- g(z) = max(0.01z,z)
+- g'(z) = 0.01 if z<0 , 1 if z > 0
+
+
+
+
+Forward propagation:
+-  Z[1] = W[1] X + b[1]
+-  A[1] = g[1](z[1])
+-  Z[2] = W[2] A[1] + b[2]
+-  A[2] = g[2](z[2])
+
+back propagation: binary classification with sigmoid 
+
+-   dZ[2] = A[2] - Y 
+-   dW[2] = 1/m dZ[2] A[1].T
+-   db[2] = 1/m  np.sum(dZ[2], axis = 1, keepdims = True)
+-   dZ[1] = W[2].T dZ[2] * g[1]'(Z[1])
+-   dW[1] = 1/m  dZ[1] X.T
+-   db[1] = 1/m  np.sum(dZ[1], axis = 1, keep dims = Ture)
+
+- * = element wise product
+
+Backprop intuition:
+- Loss is defined as L(a,y) = -yloga - (1-y)log(1-a)
+- d/da L =  - y/a + (1-y)/(1-a) 
+
+-  dz = da * g'(z) 
+-  a = sigmoid(z)
+
+- dL/dz= dL/da * da/dz 
+- da/dz = d/dz g(z) = g'(z)
+
+- dw = dz * x 
+- db = dz 
+
+ Go back: calc dA[2], dZ[2] , dA[1], dZ[1]
+- we can skip da[2]
+- dz[2] = a[2] - y
+- dw[2] = dz[2] a[1].T
+- db[2] = dz[2] 
+
+- dz[1] = W[2].t dz[2] * g[1]' (Z[1]) 
+- W[2] = (n[2],n[1]) dimensions
+- Z[2] , dZ[2] = (n[2],1) ---  (1,1) dimensions 
+- dZ[1] = W[2].T dZ[2] * g[1]'(Z[1])
+- (n[1],1) = (n[1],n[2])(n[2],1) * (n[1],1) dimensions 
+
+- dW[1] = dz[1] X.T
+db[1] = dz[1] 
+
+
+
+The number of rows in W[k] is the number of neurons in the k-th layer and the number of columns is the number of inputs of the layer.
